@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 
+/*
+	Container for GUI information and mappings for the keys
+*/
 class KeyMapper{
 	private JComboBox<Tone> comboBox;
 	private JLabel label;
@@ -24,6 +27,7 @@ class KeyMapper{
 		this.key = key;
 		this.label = new JLabel(""+(char)key);
 		this.comboBox = new JComboBox(standardTones);
+		this.comboBox.setFocusable(false);
 		comboBox.setSelectedIndex(index);
 	}
 	

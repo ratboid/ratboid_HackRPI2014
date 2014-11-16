@@ -12,6 +12,7 @@ public class Chiptune extends JFrame{
 		panel = new JPanel(new GridLayout(6,6));
 		menus = new Vector<KeyMapper>();
 		
+		//Create Window components
 		for(int i = KeyEvent.VK_0, j = 0; i <= KeyEvent.VK_Z;i++, j += 3){
 			if( i == KeyEvent.VK_9 + 1){
 				i = KeyEvent.VK_A;
@@ -19,6 +20,7 @@ public class Chiptune extends JFrame{
 			this.add(new KeyMapper(i,j));
 		}
 		
+		//Handle Key Strokes
 		panel.addKeyListener(new KeyListener(){
 			public void keyPressed(KeyEvent e){
 				Tone t = getTone(e.getExtendedKeyCode());
@@ -41,11 +43,11 @@ public class Chiptune extends JFrame{
 		this.setSize(980, 260); //980, 260 or 800, 500
 		this.setTitle("ChipTune");
 		this.setVisible(true);
-		while(true){
-			Audio.playInput();
-		}
 	}
 	
+	/*
+		Handles the insertion of an individual KeyMapper
+	*/
 	private void add(KeyMapper km){
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(km.getLabel());
@@ -54,6 +56,9 @@ public class Chiptune extends JFrame{
 		menus.add(km);
 	}
 	
+	/*
+		Extracts Tone from the list
+	*/
 	private Tone getTone(int ch){
 		for(KeyMapper k: menus){
 			if(k.getKey() == ch){
@@ -65,6 +70,9 @@ public class Chiptune extends JFrame{
 	
 	public static void main(String[] args){
 		new Chiptune();
+		while(true){
+			Audio.playInput();
+		}
 		
 	}
 }

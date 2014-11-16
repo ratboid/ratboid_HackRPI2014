@@ -96,7 +96,7 @@ public final class Audio {
     }
 
 	/**
-		BEGIN ARTHUR CODE
+		BEGIN ARTHUR's CODE
 	*/
 	
 	public static Set<Tone> tones = new TreeSet<Tone>();
@@ -105,11 +105,13 @@ public final class Audio {
 	
 	public enum Instrument {SINE, SQUARE, SAWTOOTH};
 	
-    // create a sound (sine, square or other wave) of the given frequency (Hz), for the given
-    // duration (seconds) scaled to the given volume (amplitude)
+	/**
+		create a sound (sine, square, sawtooth wave) of the given frequency (Hz), for the given
+		duration (seconds) scaled to the given volume (amplitude)
+	*/
     private static double[] note(double hz, double duration, double amplitude, double shift, Instrument instrument) {
-        int N = (int) (Audio.SAMPLE_RATE * duration);
-		int D = (int) (Audio.SAMPLE_RATE * shift);
+        int N = (int) (SAMPLE_RATE * duration);
+		int D = (int) (SAMPLE_RATE * shift);
         double[] a = new double[N+1];
         for (int i = 0; i <= N; i++){
 			double k = (i + D) * hz / Audio.SAMPLE_RATE;
@@ -129,6 +131,9 @@ public final class Audio {
         return a;
     }
 
+	/*
+		Averages the signals for tones
+	*/
 	private static double[] sum(double[] ... waves){
 		int max = waves[0].length;
 		for(int i = 0; i < waves.length; i++){
@@ -149,31 +154,46 @@ public final class Audio {
 
 	}
 	
+	/**
+		Calculates the frequency of a note d 1/2-steps up
+	*/
 	public static double freq(double f0,double d){
 		return f0 * Math.pow(2,d/12.0);
 	}
 	
+	/**
+		adds a new Tone to the tones playing
+	*/
 	public static void add(Tone t){
 		synchronized(tones){
 			tones.add(t);
 		}
 	}
 	
+	/**
+		removes tones from the playing tones
+	*/
 	public static void remove(Tone t){
 		synchronized(tones){
 			tones.remove(t);
 		}
 	}
 	
+	
+	/**
+		plays all of the tones in the set
+	*/
 	public static void playInput(){
 		synchronized(tones){
 			double[][] tune = new double[tones.size()][];
+			System.out.println(tones.size());
 			int i = 0;
 			for(Tone t: tones){
 				tune[i] = Audio.note(t.getFrequency(),STEP,0.5,phase,t.getInstrument());
 				i++;
 			}
 			if(tune.length == 0){
+				Audio.play(new double[(int)STEP*SAMPLE_RATE]);
 				phase = 0.0;
 			}else{
 				Audio.play(Audio.sum(tune));

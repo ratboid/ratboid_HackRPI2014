@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 
+/*
+	Container for tones, with both frequency and wave information
+*/
 class Tone implements Comparable<Tone>{
 	private double frequency;
 	private Audio.Instrument instrument;
