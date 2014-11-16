@@ -14,22 +14,38 @@ class KeyMapper{
 	private static Tone[] standardTones = null;
 	private static final int TONE_COUNT = 36;
 	private static final Audio.Instrument[] insts = Audio.Instrument.values();
-	public KeyMapper(int key,int index){
+	private static final double BASE_TONE = 110;
+	
+	private static void init(){
 		if(standardTones == null){
 			standardTones = new Tone[ (TONE_COUNT + 1)* insts.length];
 			for(int i = 0; i <= TONE_COUNT; i++){
 				for(int j = 0; j < insts.length; j++){
-					standardTones[i * insts.length + j] = new Tone(Audio.freq(220,i),insts[j]); 
+					standardTones[j * TONE_COUNT + i] = new Tone(Audio.freq(BASE_TONE,i),insts[j]); 
 				}
 			}
 		}
-		
+	}
+
+	public KeyMapper(int key,int index,Tone[] tones){
+		init();
+		if(tones == null){
+			tones = standardTones;
+		}
 		this.key = key;
 		this.label = new JLabel(""+(char)key);
-		this.comboBox = new JComboBox(standardTones);
+		this.comboBox = new JComboBox(tones);
 		this.comboBox.setFocusable(false);
 		comboBox.setSelectedIndex(index);
 	}
+	
+	public KeyMapper(int key, int index){
+		this(key,index,standardTones);
+	}
+	/**
+	public KeyMapper(int key,double hz,Audio.Instrument tone){
+		
+	}*/
 	
 	public JComboBox<Tone> getComboBox(){
 		return comboBox;

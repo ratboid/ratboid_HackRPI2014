@@ -29,12 +29,22 @@ class Tone implements Comparable<Tone>{
 	}
 	
 	public int compareTo(Tone t){
-		if(this.frequency>t.frequency){
-			return -1;
-		}else if(t.frequency>this.frequency){
+		if(Math.abs(this.frequency-t.frequency) < 1E-6){
+			if(this.instrument.ordinal() > t.instrument.ordinal()){
+				return 1;
+			}else if(this.instrument.ordinal() < t.instrument.ordinal()){
+				return -1;
+			}else{
+				return 0;
+			}
+		}else if(this.frequency > t.frequency){
 			return 1;
 		}else{
-			return 0;
+			return -1;
 		}
+	}
+	
+	public boolean equals(Object o){
+		return (o instanceof Tone && this.compareTo((Tone)o) == 0);
 	}
 }

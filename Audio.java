@@ -38,7 +38,7 @@ public final class Audio {
     // open up an audio stream
     private static void init() {
         try {
-        AudioFormat format = new AudioFormat((float) SAMPLE_RATE, BITS_PER_SAMPLE, 1, true, false);
+			AudioFormat format = new AudioFormat((float) SAMPLE_RATE, BITS_PER_SAMPLE, 1, true, false);
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
             line = (SourceDataLine) AudioSystem.getLine(info);
@@ -186,7 +186,6 @@ public final class Audio {
 	public static void playInput(){
 		synchronized(tones){
 			double[][] tune = new double[tones.size()][];
-			System.out.println(tones.size());
 			int i = 0;
 			for(Tone t: tones){
 				tune[i] = Audio.note(t.getFrequency(),STEP,0.5,phase,t.getInstrument());
