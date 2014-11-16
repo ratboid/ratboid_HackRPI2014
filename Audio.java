@@ -1,17 +1,3 @@
-/*************************************************************************
- *  Compilation:  javac StdAudio.java
- *  Execution:    java StdAudio
- *  
- *  Simple library for reading, writing, and manipulating .wav files.
-
- *
- *  Limitations
- *  -----------
- *    - Does not seem to work properly when reading .wav files from a .jar file.
- *    - Assumes the audio is monaural, with sampling rate of 44,100.
- *
- *************************************************************************/
-
 import java.applet.*;
 import java.io.*;
 import java.net.*;
@@ -19,19 +5,12 @@ import javax.sound.sampled.*;
 import java.util.*;
 
 /**
- *  <i>Standard audio</i>. This class provides a basic capability for
- *  creating, reading, and saving audio. 
- *  <p>
- *  The audio format uses a sampling rate of 44,100 (CD quality audio), 16-bit, monaural.
- *
- *  <p>
- *  For additional documentation, see <a href="http://introcs.cs.princeton.edu/15inout">Section 1.5</a> of
- *  <i>Introduction to Programming in Java: An Interdisciplinary Approach</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
+ *	@author Arthur Kalb
  */
-public final class StdAudio {
+public final class Audio {
 
     /**
      *  The sample rate - 44,100 Hz for CD quality audio.
@@ -48,15 +27,10 @@ public final class StdAudio {
     private static byte[] buffer;         // our internal buffer
     private static int bufferSize = 0;    // number of samples currently in internal buffer
 	
-	public static Set<Tone> tones = new TreeSet<Tone>();
-	private static double phase = 0.0;
-	private static double STEP = 0.01;
-	
-	public enum Instrument {SINE, SQUARE, SAWTOOTH};
+
 
     // do not instantiate
-    private StdAudio() { }
-
+    private Audio() { }
    
     // static initializer
     static { init(); }
@@ -64,16 +38,12 @@ public final class StdAudio {
     // open up an audio stream
     private static void init() {
         try {
-            // 44,100 samples per second, 16-bit audio, mono, signed PCM, little Endian
-            AudioFormat format = new AudioFormat((float) SAMPLE_RATE, BITS_PER_SAMPLE, 1, true, false);
+        AudioFormat format = new AudioFormat((float) SAMPLE_RATE, BITS_PER_SAMPLE, 1, true, false);
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(format, SAMPLE_BUFFER_SIZE * BYTES_PER_SAMPLE);
-            
-            // the internal buffer is a fraction of the actual buffer size, this choice is arbitrary
-            // it gets divided because we can't expect the buffered data to line up exactly with when
-            // the sound card decides to push out its samples.
+
             buffer = new byte[SAMPLE_BUFFER_SIZE * BYTES_PER_SAMPLE/3];
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -125,14 +95,24 @@ public final class StdAudio {
         }
     }
 
+	/**
+		BEGIN ARTHUR CODE
+	*/
+	
+	public static Set<Tone> tones = new TreeSet<Tone>();
+	private static double phase = 0.0;
+	private static double STEP = 0.001;
+	
+	public enum Instrument {SINE, SQUARE, SAWTOOTH};
+	
     // create a sound (sine, square or other wave) of the given frequency (Hz), for the given
     // duration (seconds) scaled to the given volume (amplitude)
     private static double[] note(double hz, double duration, double amplitude, double shift, Instrument instrument) {
-        int N = (int) (StdAudio.SAMPLE_RATE * duration);
-		int D = (int) (StdAudio.SAMPLE_RATE * shift);
+        int N = (int) (Audio.SAMPLE_RATE * duration);
+		int D = (int) (Audio.SAMPLE_RATE * shift);
         double[] a = new double[N+1];
         for (int i = 0; i <= N; i++){
-			double k = (i + D) * hz / StdAudio.SAMPLE_RATE;
+			double k = (i + D) * hz / Audio.SAMPLE_RATE;
 			switch(instrument){
 				case SINE:
 					a[i] = amplitude * Math.sin(2 * Math.PI * k);
@@ -174,65 +154,31 @@ public final class StdAudio {
 	}
 	
 	public static void add(Tone t){
-		tones.add(t);
-		playInput();
+		synchronized(tones){
+			tones.add(t);
+		}
 	}
 	
 	public static void remove(Tone t){
-		tones.remove(t);
-		playInput();
+		synchronized(tones){
+			tones.remove(t);
+		}
 	}
 	
 	public static void playInput(){
-		double[][] tune = new double[tones.size()][];
-		int i = 0;
-		for(Tone t: tones){
-			tune[i] = StdAudio.note(t.getFrequency(),STEP,0.5,phase,t.getInstrument());
-			i++;
-		}
-		if(tune.length == 0){
-			phase = 0.0;
-		}else{
-			StdAudio.play(StdAudio.sum(tune));
-			phase += STEP;
+		synchronized(tones){
+			double[][] tune = new double[tones.size()][];
+			int i = 0;
+			for(Tone t: tones){
+				tune[i] = Audio.note(t.getFrequency(),STEP,0.5,phase,t.getInstrument());
+				i++;
+			}
+			if(tune.length == 0){
+				phase = 0.0;
+			}else{
+				Audio.play(Audio.sum(tune));
+				phase += STEP;
+			}
 		}
 	}
-	
-    public static void main(String[] args) {
-		
-		Scanner scan = new Scanner(System.in);
-		String[] line = null;
-		double[][] tune;
-		boolean flag = true;
-		while(flag){
-			line = scan.nextLine().toLowerCase().split("\\W+");
-			tune = new double[line.length][];
-			for(int w = 0; w < line.length; w++ ){
-				String word = line[w];
-				word.replaceAll("[^a-z]","");
-				if(word.equals("quit")){
-					flag = false;
-				}
-				double[][] sounds = new double[word.length()][];
-				for(int i = 0; i < word.length(); i++){
-					int d = (int)word.charAt(i) - (int)'m'; 
-					sounds[i] = StdAudio.sum(
-								StdAudio.note(freq(440,d),0.5,0.5,0.0,Instrument.SINE));
-				}
-				if(word.length() > 0){
-					tune[w] = StdAudio.sum(sounds);
-				}
-			}
-			for(int t = 0; t < tune.length; t++){
-				StdAudio.play(tune[t]);
-			}
-		}
-		
-        // need to call this in non-interactive stuff so the program doesn't terminate
-        // until all the sound leaves the speaker.
-        StdAudio.close(); 
-
-        // need to terminate a Java program with sound
-        System.exit(0);
-    }
 }
