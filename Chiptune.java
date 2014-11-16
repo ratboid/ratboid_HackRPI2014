@@ -29,7 +29,8 @@ public class Chiptune extends JFrame{
 			}
 		}else{
 			try{
-				Scanner scan = new Scanner(new File(file));			
+				Scanner scan = new Scanner(new File(file));	
+				KeyMapper.BASE_TONE = Double.parseDouble(scan.nextLine());
 				scan.useDelimiter(",");
 				while(scan.hasNext()){
 					String[] args = scan.next().split(":");
@@ -48,6 +49,8 @@ public class Chiptune extends JFrame{
 			}
 			catch(FileNotFoundException e){
 				System.out.println(e);
+			}catch(NullPointerException e){
+				System.out.println("bad file!");
 			}
 		}
 		
@@ -84,8 +87,6 @@ public class Chiptune extends JFrame{
 					try{
 						out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 						out.println(KeyMapper.BASE_TONE);
-						out.println(KeyMapper.transpose);
-						out.println(KeyMapper.dingus);
 						for(KeyMapper km : menus){
 							out.print(km.getLabel().getText()+":"+km.getComboBox().getSelectedIndex()+",");
 						}

@@ -16,7 +16,6 @@ class KeyMapper{
 	private static final Audio.Instrument[] insts = Audio.Instrument.values();
 	public static double BASE_TONE = 110;
 	public static double transpose = 15;
-	public static Audio.Instrument dingus = Audio.Instrument.SQUARE;
 	
 	private static void init(){
 		if(standardTones == null){
@@ -38,7 +37,6 @@ class KeyMapper{
 		this.label = new JLabel(""+(char)key);
 		this.comboBox = new JComboBox(tones);
 		this.comboBox.setFocusable(false);
-		index = index + TONE_COUNT*dingus.ordinal();
 		comboBox.setSelectedIndex(index);
 	}
 	
