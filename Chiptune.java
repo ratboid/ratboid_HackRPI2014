@@ -28,18 +28,26 @@ public class Chiptune extends JFrame{
 				this.add(new KeyMapper(i,j));
 			}
 		}else{
-			Scanner scan = new Scanner(file);
-			while(scan.hasNext(",")){
-				String[] args = scan.next(",").split(":");
-				try{
-					this.add(new KeyMapper((int)args[0].charAt(0),Integer.parseInt(args[1])));
-				}catch(ArrayIndexOutOfBoundsException e){
-					System.out.println(file+" has invalid arguments for one combination");
-				}catch(NumberFormatException e){
-					System.out.println("cannot acceses index: "+args[1]);
-				}catch(Exception e){
-					System.out.println("Unaccounted for Exception "+ e);
+			try{
+				Scanner scan = new Scanner(new File(file));			
+				scan.useDelimiter(",");
+				while(scan.hasNext()){
+					String[] args = scan.next().split(":");
+					if(args.length >= 2){
+						try{
+							this.add(new KeyMapper((int)args[0].charAt(0),Integer.parseInt(args[1])));
+						}catch(ArrayIndexOutOfBoundsException e){
+							System.out.println(file+" has invalid arguments for one combination");
+						}catch(NumberFormatException e){
+							System.out.println("cannot acceses index: "+args[1]);
+						}catch(Exception e){
+							System.out.println("Unaccounted for Exception "+ e);
+						}
+					}
 				}
+			}
+			catch(FileNotFoundException e){
+				System.out.println(e);
 			}
 		}
 		
@@ -75,6 +83,9 @@ public class Chiptune extends JFrame{
 					PrintWriter out = null;
 					try{
 						out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+						out.println(KeyMapper.BASE_TONE);
+						out.println(KeyMapper.transpose);
+						out.println(KeyMapper.dingus);
 						for(KeyMapper km : menus){
 							out.print(km.getLabel().getText()+":"+km.getComboBox().getSelectedIndex()+",");
 						}
@@ -121,7 +132,11 @@ public class Chiptune extends JFrame{
 	}
 	
 	public static void main(String[] args){
-		new Chiptune();
+		if(args.length > 0){
+			new Chiptune(args[0]);
+		}else{
+			new Chiptune();
+		}
 		while(true){
 			Audio.playInput();
 		}

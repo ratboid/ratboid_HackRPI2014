@@ -14,14 +14,16 @@ class KeyMapper{
 	private static Tone[] standardTones = null;
 	private static final int TONE_COUNT = 36;
 	private static final Audio.Instrument[] insts = Audio.Instrument.values();
-	private static final double BASE_TONE = 110;
+	public static double BASE_TONE = 110;
+	public static double transpose = 15;
+	public static Audio.Instrument dingus = Audio.Instrument.SQUARE;
 	
 	private static void init(){
 		if(standardTones == null){
 			standardTones = new Tone[ (TONE_COUNT + 1)* insts.length];
 			for(int i = 0; i <= TONE_COUNT; i++){
 				for(int j = 0; j < insts.length; j++){
-					standardTones[j * TONE_COUNT + i] = new Tone(Audio.freq(BASE_TONE,i),insts[j]); 
+					standardTones[j * TONE_COUNT + i] = new Tone(Audio.freq(BASE_TONE,i+transpose),insts[j]); 
 				}
 			}
 		}
@@ -36,6 +38,7 @@ class KeyMapper{
 		this.label = new JLabel(""+(char)key);
 		this.comboBox = new JComboBox(tones);
 		this.comboBox.setFocusable(false);
+		index = index + TONE_COUNT*dingus.ordinal();
 		comboBox.setSelectedIndex(index);
 	}
 	
